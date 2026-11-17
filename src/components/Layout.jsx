@@ -89,6 +89,10 @@ function Shell({ children }) {
       <div className="main">
         <header className="topbar">
           <div className="top-logo mobile-only"><img src="/tescologo2.png" alt="Tesco Structures" /><span>Sales</span></div>
+          <div className="topbar-title">
+            <b>Tesco Structures Sales Workspace</b>
+            <span>Logged in as <strong>{user.name}</strong> · {isHead ? 'Sales Head' : 'Sales Team'}</span>
+          </div>
           <div className="topbar-right">
             <Bellmenu />
           </div>
