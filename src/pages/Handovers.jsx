@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, FileStack, Paperclip } from 'lucide-react';
+import { Plus, Search, FileStack, Paperclip, Eye } from 'lucide-react';
 import { useLiveApi as useApi } from '../hooks.js';
 import { qs, fmtDateTime, inr } from '../api.js';
 import { Badge, Loader, ErrorBox, Empty } from '../components/ui.jsx';
@@ -32,7 +32,7 @@ export default function Handovers() {
       ) : (
         <div className="table-wrap">
           <table className="table responsive">
-            <thead><tr><th>Reference</th><th>Project</th><th>Client</th><th>Value</th><th>Owner</th><th>Status</th><th>Updated</th></tr></thead>
+            <thead><tr><th>Reference</th><th>Project</th><th>Client</th><th>Value</th><th>Owner</th><th>Status</th><th>Updated</th><th>Action</th></tr></thead>
             <tbody>
               {list.map((h) => (
                 <tr key={h.id} className="click" onClick={() => nav(`/handovers/${h.id}`)}>
@@ -43,6 +43,7 @@ export default function Handovers() {
                   <td data-label="Owner">{h.createdBy?.name || '—'}</td>
                   <td data-label="Status"><Badge value={h.status} /></td>
                   <td data-label="Updated">{fmtDateTime(h.updatedAt)}</td>
+                  <td data-label="Action"><button className="btn ghost sm" onClick={(e) => { e.stopPropagation(); nav(`/handovers/${h.id}`); }}><Eye size={15} /> View</button></td>
                 </tr>
               ))}
             </tbody>
