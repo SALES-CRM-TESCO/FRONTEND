@@ -20,6 +20,7 @@ const blank = () => ({
   pricing: { quotedPrice: '', milestones: DEFAULT_MILESTONES.map((m) => ({ ...m })) },
   siteVisitCompleted: false,
   declarationAccepted: false,
+  priority: 'Medium',
 });
 
 // Lead time in days between two YYYY-MM-DD dates.
@@ -56,6 +57,7 @@ export default function HandoverForm() {
         pricing: { quotedPrice: h.pricing?.quotedPrice || '', milestones: (h.pricing?.milestones?.length ? h.pricing.milestones : b.pricing.milestones).map((m) => ({ term: m.term || '', percentage: m.percentage ?? '' })) },
         siteVisitCompleted: !!h.siteVisitCompleted,
         declarationAccepted: !!h.declarationAccepted,
+        priority: h.priority || 'Medium',
       });
       setAttachments(h.attachments || []);
       setStatus(h.status);
@@ -84,6 +86,7 @@ export default function HandoverForm() {
     pricing: { quotedPrice: quoted, milestones: f.pricing.milestones.map((m) => ({ term: m.term, percentage: Number(m.percentage) || 0, value: milestoneValue(m.percentage) })) },
     siteVisitCompleted: f.siteVisitCompleted,
     declarationAccepted: f.declarationAccepted,
+    priority: f.priority,
   });
 
   async function ensureSaved() {
@@ -248,6 +251,19 @@ export default function HandoverForm() {
         ))}
         <input ref={fileRef} type="file" multiple accept={ACCEPT} style={{ display: 'none' }} onChange={pickFiles} />
         <button className="btn ghost mt" disabled={uploading} onClick={() => fileRef.current?.click()}><Paperclip size={16} /> {uploading ? 'Uploading…' : 'Add files'}</button>
+      </section>
+
+      {/* 7. Project Priority — the last step; sets the priority the Execution team sees on the project */}
+      <section className="form-sec">
+        <h3>7. Project Priority</h3>
+        <div className="muted small" style={{ marginBottom: 8 }}>Set how urgent this project is. The Execution team receives the project with exactly this priority.</div>
+        <div className="form-grid">
+          <Field label="Priority *">
+            <select value={f.priority} onChange={(e) => setF((s) => ({ ...s, priority: e.target.value }))}>
+              {['Low', 'Medium', 'High', 'Urgent'].map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </Field>
+        </div>
       </section>
 
       <div className="row-actions" style={{ justifyContent: 'flex-end', marginTop: 8 }}>
