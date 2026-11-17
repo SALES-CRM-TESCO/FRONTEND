@@ -1,22 +1,17 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, FileStack, Paperclip } from 'lucide-react';
 import { useLiveApi as useApi } from '../hooks.js';
 import { qs, fmtDateTime, inr } from '../api.js';
 import { Badge, Loader, ErrorBox, Empty } from '../components/ui.jsx';
 import { useAuth } from '../auth.jsx';
 
-const FILTERS = ['All', 'Draft', 'Submitted', 'Under Review', 'Changes Requested', 'Accepted', 'Rejected'];
-
 export default function Handovers() {
   const { isHead } = useAuth();
-  const [sp, setSp] = useSearchParams();
-  const status = sp.get('status') || 'All';
   const [q, setQ] = useState('');
   const nav = useNavigate();
-  const { data, error, loading } = useApi(`/handovers${qs({ status: status === 'All' ? '' : status, q })}`);
+  const { data, error, loading } = useApi(`/handovers${qs({ q })}`);
   const list = data?.handovers || [];
-  const setStatus = (s) => { const n = new URLSearchParams(sp); if (s === 'All') n.delete('status'); else n.set('status', s); setSp(n, { replace: true }); };
 
   return (
     <div>
@@ -26,11 +21,6 @@ export default function Handovers() {
       </div>
 
       <div className="ho-toolbar">
-        <div className="tabs">
-          {FILTERS.map((f) => (
-            <button key={f} className={status === f ? 'active' : ''} onClick={() => setStatus(f)}>{f}</button>
-          ))}
-        </div>
         <div className="search">
           <Search size={16} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search ref, project, client…" />
@@ -38,7 +28,7 @@ export default function Handovers() {
       </div>
 
       {loading && !data ? <Loader /> : error ? <ErrorBox error={error} /> : list.length === 0 ? (
-        <Empty icon={FileStack} title="No handovers found">{status === 'All' ? <Link className="btn primary mt" to="/handovers/new">Create a handover</Link> : 'Try a different status filter.'}</Empty>
+        <Empty icon={FileStack} title="No handovers found"><Link className="btn primary mt" to="/handovers/new">Create a handover</Link></Empty>
       ) : (
         <div className="table-wrap">
           <table className="table responsive">

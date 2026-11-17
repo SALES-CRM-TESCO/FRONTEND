@@ -55,13 +55,13 @@ function Shell({ children }) {
   const links = isHead
     ? [
         { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
-        { to: '/handovers', icon: FileStack, label: 'Handovers' },
+        { to: '/handovers', icon: FileStack, label: 'Handovers', end: true },
         { to: '/handovers/new', icon: FilePlus2, label: 'New Handover' },
         { to: '/team', icon: Users, label: 'Team & Logins' },
       ]
     : [
         { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
-        { to: '/handovers', icon: FileStack, label: 'Handovers' },
+        { to: '/handovers', icon: FileStack, label: 'Handovers', end: true },
         { to: '/handovers/new', icon: FilePlus2, label: 'New Handover' },
         { to: '/notifications', icon: Bell, label: 'Alerts' },
       ];

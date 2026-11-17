@@ -1,4 +1,9 @@
-const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+// API base URL:
+//  • VITE_API_URL (if set, e.g. in Vercel) always wins.
+//  • Production build (vite build) → the Sales Portal API on Render.
+//  • Dev (npm run dev) → empty, so requests go through the Vite proxy to localhost:5100.
+const PROD_API_URL = 'https://backend-xu2k.onrender.com';
+const BASE = (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PROD_API_URL : '')).replace(/\/$/, '');
 const TOKEN_KEY = 'sp_token';
 
 export const getToken = () => {
