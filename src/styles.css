@@ -533,3 +533,7 @@ button.bn-link { background: none; border: 0; font: inherit; font-size: 11px; fo
 .warn-text { color: #b45309; }
 .table td input { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
 .table .num { text-align: right; }
+
+/* Dashboard KPI cards (Design-CRM style) */
+.dcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:18px}
+.dcard:hover{box-shadow:0 12px 28px -12px rgba(15,23,42,.22)!important}

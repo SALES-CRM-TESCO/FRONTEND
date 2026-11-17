@@ -4,10 +4,11 @@ import { useLiveApi as useApi } from '../hooks.js';
 import { fmtDateTime, inr } from '../api.js';
 import { Badge, Loader, ErrorBox, Empty } from '../components/ui.jsx';
 import { useAuth } from '../auth.jsx';
+import StatCard from '../components/StatCard.jsx';
 
 const CARDS = [
-  ['total', 'Total Handovers', FileStack, 'navy', '/handovers'],
-  ['completed', 'Accepted', CheckCircle2, 'green', '/handovers?status=Accepted'],
+  { k: 'total', title: 'Total Handovers', icon: <FileStack size={20} />, trend: 'All forms', desc: 'Handovers', color: '#4F46E5', bg: '#E0E7FF', to: '/handovers' },
+  { k: 'completed', title: 'Accepted', icon: <CheckCircle2 size={20} />, trend: 'By Execution', desc: 'Accepted', color: '#22C55E', bg: '#DCFCE7', to: '/handovers?status=Accepted' },
 ];
 
 export default function Dashboard() {
@@ -27,15 +28,11 @@ export default function Dashboard() {
         <Link className="btn primary" to="/handovers/new"><Plus size={18} /> New Handover</Link>
       </div>
 
-      <div className="cards three">
-        {CARDS.map(([k, label, Icon, color, to]) => (
-          <button key={k} className={`stat c-${color}`} onClick={() => nav(to)}>
-            <div className="stat-icon"><Icon size={20} /></div>
-            <div className="stat-val">{d[k] ?? 0}</div>
-            <div className="stat-label">{label}</div>
-          </button>
+      <div className="dcards">
+        {CARDS.map((c) => (
+          <StatCard key={c.k} title={c.title} value={d[c.k] ?? 0} icon={c.icon} trend={c.trend} desc={c.desc} color={c.color} bg={c.bg} onClick={() => nav(c.to)} />
         ))}
-        <div className="stat c-teal"><div className="stat-icon"><IndianRupee size={20} /></div><div className="stat-val">{inr(d.totalValue || 0)}</div><div className="stat-label">Total Project Value</div></div>
+        <StatCard title="Total Project Value" value={inr(d.totalValue || 0)} icon={<IndianRupee size={20} />} trend="Combined" desc="Order value" color="#0D9488" bg="#CCFBF1" />
       </div>
 
       <section className="panel">
