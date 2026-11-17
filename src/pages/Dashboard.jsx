@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FileStack, Clock, RotateCcw, CheckCircle2, Plus, FileText } from 'lucide-react';
+import { FileStack, CheckCircle2, Plus, IndianRupee } from 'lucide-react';
 import { useLiveApi as useApi } from '../hooks.js';
 import { fmtDateTime, inr } from '../api.js';
 import { Badge, Loader, ErrorBox, Empty } from '../components/ui.jsx';
@@ -7,8 +7,6 @@ import { useAuth } from '../auth.jsx';
 
 const CARDS = [
   ['total', 'Total Handovers', FileStack, 'navy', '/handovers'],
-  ['pending', 'Pending with Execution', Clock, 'blue', '/handovers?status=Submitted'],
-  ['changesRequested', 'Changes Requested', RotateCcw, 'orange', '/handovers?status=Changes Requested'],
   ['completed', 'Accepted', CheckCircle2, 'green', '/handovers?status=Accepted'],
 ];
 
@@ -29,7 +27,7 @@ export default function Dashboard() {
         <Link className="btn primary" to="/handovers/new"><Plus size={18} /> New Handover</Link>
       </div>
 
-      <div className="cards">
+      <div className="cards three">
         {CARDS.map(([k, label, Icon, color, to]) => (
           <button key={k} className={`stat c-${color}`} onClick={() => nav(to)}>
             <div className="stat-icon"><Icon size={20} /></div>
@@ -37,12 +35,7 @@ export default function Dashboard() {
             <div className="stat-label">{label}</div>
           </button>
         ))}
-      </div>
-
-      <div className="cards three">
-        <div className="stat c-amber"><div className="stat-icon"><FileText size={20} /></div><div className="stat-val">{d.draft ?? 0}</div><div className="stat-label">Drafts</div></div>
-        <div className="stat c-purple"><div className="stat-icon"><Clock size={20} /></div><div className="stat-val">{d.underReview ?? 0}</div><div className="stat-label">Under Review</div></div>
-        <div className="stat c-teal"><div className="stat-icon"><CheckCircle2 size={20} /></div><div className="stat-val">{inr(d.totalValue || 0)}</div><div className="stat-label">Total Project Value</div></div>
+        <div className="stat c-teal"><div className="stat-icon"><IndianRupee size={20} /></div><div className="stat-val">{inr(d.totalValue || 0)}</div><div className="stat-label">Total Project Value</div></div>
       </div>
 
       <section className="panel">
