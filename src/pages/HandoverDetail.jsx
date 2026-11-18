@@ -6,6 +6,7 @@ import { api, attachmentUrl, fileKB, fmtDate, fmtDateTime, inr } from '../api.js
 import { Badge, Loader, ErrorBox } from '../components/ui.jsx';
 
 const EDITABLE = ['Draft', 'Changes Requested'];
+const CORRECTABLE = ['Submitted', 'Under Review']; // already with Execution, but Sales may still correct details
 const KV = ({ k, v }) => (<div><div className="k">{k}</div><div className="v">{v || '—'}</div></div>);
 const YN = ({ v }) => <span>{v || '—'}</span>;
 
@@ -23,6 +24,7 @@ export default function HandoverDetail() {
   const d = h.details || {}, sc = h.scope || {}, tl = h.timeline || {}, pr = h.pricing || {};
   const activity = data.activity || [];
   const editable = EDITABLE.includes(h.status);
+  const correctable = CORRECTABLE.includes(h.status);
 
   const act = async (fn) => { setBusy(true); setErr(''); try { await fn(); } catch (e) { setErr(e.message); } finally { setBusy(false); } };
   const submit = () => act(async () => { await api(`/handovers/${id}/submit`, { method: 'POST' }); reload(); });
@@ -40,6 +42,7 @@ export default function HandoverDetail() {
         <div className="row-actions">
           {editable && <Link className="btn" to={`/handovers/${id}/edit`}><Pencil size={15} /> Edit</Link>}
           {editable && <button className="btn primary" disabled={busy} onClick={submit}><Send size={15} /> {h.status === 'Changes Requested' ? 'Resubmit' : 'Submit to Execution'}</button>}
+          {correctable && <Link className="btn" to={`/handovers/${id}/edit`}><Pencil size={15} /> Correct Details</Link>}
           {h.status === 'Draft' && <button className="btn ghost danger" disabled={busy} onClick={del}><Trash2 size={15} /> Delete</button>}
         </div>
       </div>
@@ -73,6 +76,8 @@ export default function HandoverDetail() {
             <div className="kv">
               <KV k="Type of Project" v={sc.typeOfProject} />
               <KV k="Project Size / Area" v={sc.projectSizeArea} />
+              <KV k="Length" v={sc.length ? `${sc.length} ${sc.unit || 'ft'}` : '—'} />
+              <KV k="Width" v={sc.width ? `${sc.width} ${sc.unit || 'ft'}` : '—'} />
               <KV k="Design" v={[sc.design3D && '3D', sc.design2D && '2D'].filter(Boolean).join(' + ') || 'None'} />
               <KV k="Transportation — Client Scope" v={<YN v={sc.transportationClientScope} />} />
               <KV k="Scaffolding — Client Scope" v={<YN v={sc.scaffoldingClientScope} />} />
@@ -124,6 +129,28 @@ export default function HandoverDetail() {
               </div>
             ))}
           </section>
+
+          {(h.executionTasks || []).length > 0 && (
+            <section className="form-sec">
+              <h3>Execution — Daily Tasks ({h.executionTasks.filter((t) => t.status === 'Done').length}/{h.executionTasks.length} done)</h3>
+              <div className="muted small" style={{ marginBottom: 8 }}>Read-only — maintained by the Execution team.</div>
+              <div className="table-wrap">
+                <table className="table">
+                  <thead><tr><th>Task</th><th>Assigned to</th><th>Due</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {h.executionTasks.map((t) => (
+                      <tr key={t.taskId}>
+                        <td>{t.title}</td>
+                        <td>{t.assigneeName || '—'}</td>
+                        <td>{t.dueDate ? fmtDate(t.dueDate) : '—'}</td>
+                        <td><Badge value={t.status} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
         </div>
 
         <div>

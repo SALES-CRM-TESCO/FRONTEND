@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 
 const statusClass = {
   Draft: 'gray', Submitted: 'blue', 'Under Review': 'amber', 'Changes Requested': 'orange', Accepted: 'green', Rejected: 'red',
+  // Execution daily-task statuses (read-only view)
+  'To Do': 'gray', 'In Progress': 'blue', Done: 'green',
 };
 
 export const Badge = ({ value, extra }) => (value ? <span className={`badge b-${statusClass[value] || 'gray'}`}>{value}{extra}</span> : null);
