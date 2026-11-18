@@ -66,6 +66,7 @@ export default function HandoverDetail() {
               <KV k="Salesperson" v={d.salespersonName} />
               <KV k="Date of Order" v={fmtDate(d.dateOfOrder)} />
               <KV k="Proposal Ref No" v={d.proposalRefNo} />
+              <KV k="Location Map" v={d.mapLink ? <a href={d.mapLink} target="_blank" rel="noreferrer">Open map ↗</a> : '—'} />
               <div className="full"><KV k="Site Address" v={d.siteAddress} /></div>
               <div className="full"><KV k="Billing Address" v={d.billingAddress} /></div>
             </div>

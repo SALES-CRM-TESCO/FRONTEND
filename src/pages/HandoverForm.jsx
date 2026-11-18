@@ -14,7 +14,7 @@ const DEFAULT_MILESTONES = [
 ];
 
 const blank = () => ({
-  details: { leadId: '', clientName: '', projectLocation: '', contactDetails: '', billingName: '', mobileNumber: '', alternateMobile: '', siteAddress: '', billingAddress: '', gstNumber: '', emailWhatsapp: '', salespersonName: '', dateOfOrder: '', proposalRefNo: '' },
+  details: { leadId: '', clientName: '', projectLocation: '', contactDetails: '', billingName: '', mobileNumber: '', alternateMobile: '', siteAddress: '', billingAddress: '', gstNumber: '', emailWhatsapp: '', salespersonName: '', dateOfOrder: '', proposalRefNo: '', mapLink: '' },
   scope: { typeOfProject: '', projectSizeArea: '', length: '', width: '', unit: 'ft', design3D: false, design2D: false, transportationClientScope: 'Yes', scaffoldingClientScope: 'Yes' },
   timeline: { tentativeStartDate: '', tentativeCompletionDate: '' },
   pricing: { quotedPrice: '', milestones: DEFAULT_MILESTONES.map((m) => ({ ...m })) },
@@ -86,13 +86,22 @@ export default function HandoverForm() {
   // ---- Form validation (blocks submit; a draft can still be saved incomplete) ----
   const [invalid, setInvalid] = useState({});
   const bad = (k) => !!invalid[k];
+  // A valid Indian mobile: 10 digits starting 6–9, with an optional +91 / 91 / 0 prefix.
+  const validMobile = (v) => {
+    let d = String(v || '').replace(/\D/g, '');
+    if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+    else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+    return /^[6-9]\d{9}$/.test(d);
+  };
   function validate() {
     const problems = [];
     const miss = {};
     const need = (cond, key, label) => { if (!cond) { problems.push(label); miss[key] = true; } };
     need(f.details.clientName.trim(), 'clientName', 'Client Name');
     need(f.details.projectLocation.trim(), 'projectLocation', 'Project Location');
-    need(/^\d{7,15}$/.test(String(f.details.mobileNumber).replace(/\D/g, '')), 'mobileNumber', 'Mobile Number (7–15 digits)');
+    need(validMobile(f.details.mobileNumber), 'mobileNumber', 'a valid 10-digit Mobile Number');
+    // Alternate mobile is optional, but if entered it must be valid too.
+    if (String(f.details.alternateMobile || '').trim()) need(validMobile(f.details.alternateMobile), 'alternateMobile', 'a valid Alternate Mobile Number');
     need(f.details.siteAddress.trim(), 'siteAddress', 'Site Address');
     need(f.details.salespersonName.trim(), 'salespersonName', 'Salesperson Name');
     need(f.details.dateOfOrder, 'dateOfOrder', 'Date of Order');
@@ -201,7 +210,7 @@ export default function HandoverForm() {
           <Field label="Contact Details (Phone/Email)"><input value={f.details.contactDetails} onChange={setD('contactDetails')} placeholder="e.g. 9840714353 / ..." /></Field>
           <Field label="Billing Name"><input value={f.details.billingName} onChange={setD('billingName')} /></Field>
           <Field label="Mobile Number *"><input className={bad('mobileNumber') ? 'invalid' : ''} value={f.details.mobileNumber} onChange={setD('mobileNumber')} inputMode="tel" placeholder="e.g. 9551269990" /></Field>
-          <Field label="Alternate Mobile Number"><input value={f.details.alternateMobile} onChange={setD('alternateMobile')} inputMode="tel" /></Field>
+          <Field label="Alternate Mobile Number"><input className={bad('alternateMobile') ? 'invalid' : ''} value={f.details.alternateMobile} onChange={setD('alternateMobile')} inputMode="tel" /></Field>
           <Field label="GST Number"><input value={f.details.gstNumber} onChange={setD('gstNumber')} placeholder="Enter GST number" /></Field>
           <Field label="Site Address *" full><textarea className={bad('siteAddress') ? 'invalid' : ''} rows={2} value={f.details.siteAddress} onChange={setD('siteAddress')} placeholder="e.g. 46, First main Road, Venkatraman Nagar, Chennai-600064" /></Field>
           <Field label="Billing Address" full><textarea rows={2} value={f.details.billingAddress} onChange={setD('billingAddress')} placeholder="Enter billing address if different" /></Field>
@@ -209,6 +218,7 @@ export default function HandoverForm() {
           <Field label="Salesperson Name *"><input className={bad('salespersonName') ? 'invalid' : ''} value={f.details.salespersonName} onChange={setD('salespersonName')} placeholder="e.g. Saleem Khan" /></Field>
           <Field label="Date of Order *"><input className={bad('dateOfOrder') ? 'invalid' : ''} type="date" value={f.details.dateOfOrder} onChange={setD('dateOfOrder')} /></Field>
           <Field label="Proposal Ref No *"><input className={bad('proposalRefNo') ? 'invalid' : ''} value={f.details.proposalRefNo} onChange={setD('proposalRefNo')} placeholder="e.g. TES/ENT/176-R1" /></Field>
+          <Field label="Location Map Link" full><input type="url" value={f.details.mapLink} onChange={setD('mapLink')} placeholder="Paste the Google Maps link to the site" /></Field>
         </div>
       </section>
 
