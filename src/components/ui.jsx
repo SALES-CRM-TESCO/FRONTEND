@@ -5,6 +5,9 @@ const statusClass = {
   Draft: 'gray', Submitted: 'blue', 'Under Review': 'amber', 'Changes Requested': 'orange', Accepted: 'green', Rejected: 'red',
   // Execution daily-task statuses (read-only view)
   'To Do': 'gray', 'In Progress': 'blue', Done: 'green',
+  // Execution project + material statuses (read-only daily updates)
+  'Not Started': 'gray', 'Work In Progress': 'blue', 'On Hold': 'amber', 'Material Pending': 'orange', Completed: 'green', Delayed: 'red',
+  Required: 'red', Ordered: 'amber', Delivered: 'green',
 };
 
 export const Badge = ({ value, extra }) => (value ? <span className={`badge b-${statusClass[value] || 'gray'}`}>{value}{extra}</span> : null);

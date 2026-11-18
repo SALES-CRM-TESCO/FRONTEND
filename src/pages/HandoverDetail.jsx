@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Pencil, Send, Trash2, Download, FileText, MessageSquarePlus, Check } from 'lucide-react';
+import { ArrowLeft, Pencil, Send, Trash2, Download, FileText, MessageSquarePlus, Check, FileDown } from 'lucide-react';
 import { useLiveApi as useApi } from '../hooks.js';
 import { api, attachmentUrl, fileKB, fmtDate, fmtDateTime, inr } from '../api.js';
+import { downloadHandoverUpdatesPdf } from '../pdf.js';
 import { Badge, Loader, ErrorBox } from '../components/ui.jsx';
 
 const EDITABLE = ['Draft', 'Changes Requested'];
@@ -17,6 +18,7 @@ export default function HandoverDetail() {
   const [comment, setComment] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   if (loading && !data) return <Loader />;
   if (error) return <ErrorBox error={error} />;
@@ -149,6 +151,41 @@ export default function HandoverDetail() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </section>
+          )}
+
+          {(h.executionUpdates || []).length > 0 && (
+            <section className="form-sec">
+              <div className="panel-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <h3 style={{ margin: 0 }}>Execution — Daily Updates ({h.executionUpdates.length})</h3>
+                <button className="btn primary sm" disabled={pdfBusy} onClick={async () => {
+                  setPdfBusy(true); setErr('');
+                  try {
+                    const proj = { name: h.projectName || d.projectLocation || h.clientName, client: h.clientName || d.clientName || '', location: d.projectLocation || '', handoverRef: h.ref || '' };
+                    await downloadHandoverUpdatesPdf(proj, h.executionUpdates, { filename: `${(h.ref || 'handover')}_daily_updates.pdf` });
+                  } catch (e) { setErr(e.message); } finally { setPdfBusy(false); }
+                }}><FileDown size={15} /> {pdfBusy ? 'Preparing…' : 'Download PDF'}</button>
+              </div>
+              <div className="muted small" style={{ marginBottom: 8 }}>Read-only site progress submitted by the Execution team.</div>
+              <div className="timeline">
+                {h.executionUpdates.map((u, i) => (
+                  <div key={u.reportId || i} className="tl-item">
+                    <div className="tl-dot" />
+                    <div className="tl-body">
+                      <div className="tl-top">
+                        <div className="tl-who">{fmtDate(u.reportDate)}<span className="side">{u.engineerName}</span></div>
+                        <div className="tl-time"><Badge value={u.projectStatus} /> {u.progressPercent != null && <span className="muted small">{u.progressPercent}%</span>}</div>
+                      </div>
+                      <div className="tl-msg">
+                        {u.todayProgress || u.workCompleted || <span className="muted">No written details</span>}
+                        {u.tomorrowPlan && <div className="muted small">Tomorrow: {u.tomorrowPlan}</div>}
+                        {u.materialRequired && <div className="small">Material: {u.materialRequired} {u.materialStatus && <Badge value={u.materialStatus} />}</div>}
+                        {u.photoCount > 0 && <div className="muted small">📷 {u.photoCount} site photo(s)</div>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           )}
