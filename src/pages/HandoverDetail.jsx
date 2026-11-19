@@ -155,40 +155,7 @@ export default function HandoverDetail() {
             </section>
           )}
 
-          {(h.executionUpdates || []).length > 0 && (
-            <section className="form-sec">
-              <div className="panel-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0 }}>Execution — Daily Updates ({h.executionUpdates.length})</h3>
-                <button className="btn primary sm" disabled={pdfBusy} onClick={async () => {
-                  setPdfBusy(true); setErr('');
-                  try {
-                    const proj = { name: h.projectName || d.projectLocation || h.clientName, client: h.clientName || d.clientName || '', location: d.projectLocation || '', handoverRef: h.ref || '' };
-                    await downloadHandoverUpdatesPdf(proj, h.executionUpdates, { filename: `${(h.ref || 'handover')}_daily_updates.pdf` });
-                  } catch (e) { setErr(e.message); } finally { setPdfBusy(false); }
-                }}><FileDown size={15} /> {pdfBusy ? 'Preparing…' : 'Download PDF'}</button>
-              </div>
-              <div className="muted small" style={{ marginBottom: 8 }}>Read-only site progress submitted by the Execution team.</div>
-              <div className="timeline">
-                {h.executionUpdates.map((u, i) => (
-                  <div key={u.reportId || i} className="tl-item">
-                    <div className="tl-dot" />
-                    <div className="tl-body">
-                      <div className="tl-top">
-                        <div className="tl-who">{fmtDate(u.reportDate)}<span className="side">{u.engineerName}</span></div>
-                        <div className="tl-time"><Badge value={u.projectStatus} /> {u.progressPercent != null && <span className="muted small">{u.progressPercent}%</span>}</div>
-                      </div>
-                      <div className="tl-msg">
-                        {u.todayProgress || u.workCompleted || <span className="muted">No written details</span>}
-                        {u.tomorrowPlan && <div className="muted small">Tomorrow: {u.tomorrowPlan}</div>}
-                        {u.materialRequired && <div className="small">Material: {u.materialRequired} {u.materialStatus && <Badge value={u.materialStatus} />}</div>}
-                        {u.photoCount > 0 && <div className="muted small">📷 {u.photoCount} site photo(s)</div>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          {(h.executionUpdates || []).length > 0 && <ExecutionHistory h={h} />}
         </div>
 
         <div>
@@ -232,5 +199,70 @@ export default function HandoverDetail() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Date-wise Project History from the Execution daily-update snapshots, with branded PDF export
+// (whole project or a single day). Read-only for Sales.
+function ExecutionHistory({ h }) {
+  const d = h.details || {};
+  const updates = h.executionUpdates || [];
+  const [busy, setBusy] = useState('');
+  const [err, setErr] = useState('');
+
+  const groups = (() => {
+    const m = new Map();
+    for (const u of updates) { const k = (u.reportDate || '').slice(0, 10); if (!m.has(k)) m.set(k, []); m.get(k).push(u); }
+    return [...m.entries()].sort((a, b) => b[0].localeCompare(a[0])); // newest date first
+  })();
+  const proj = { name: h.projectName || d.projectLocation || h.clientName, client: h.clientName || d.clientName || '', location: d.projectLocation || '', handoverRef: h.ref || '' };
+  const dl = async (key, list, filename) => {
+    setBusy(key); setErr('');
+    try { await downloadHandoverUpdatesPdf(proj, list, { filename }); }
+    catch (e) { setErr(e.message); } finally { setBusy(''); }
+  };
+  const done = updates.length;
+
+  return (
+    <section className="form-sec">
+      <div className="panel-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+        <h3 style={{ margin: 0 }}>Project History <span className="muted small">· {done} update(s) over {groups.length} day(s)</span></h3>
+        <button className="btn primary sm" disabled={!!busy} onClick={() => dl('all', updates, `${(h.ref || 'handover')}_project_history.pdf`)}>
+          <FileDown size={15} /> {busy === 'all' ? 'Preparing…' : 'Download PDF'}
+        </button>
+      </div>
+      <div className="muted small" style={{ marginBottom: 8 }}>Read-only site progress submitted by the Execution team.</div>
+      <ErrorBox error={err} />
+      {groups.map(([date, list]) => {
+        const photos = list.reduce((s, u) => s + (u.photoCount || 0), 0);
+        return (
+          <div key={date} style={{ marginBottom: 14 }}>
+            <div className="panel-head" style={{ borderBottom: '2px solid var(--line, #e2e8f0)', paddingBottom: 6, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ margin: 0 }}>{fmtDate(date)} <span className="muted small">· {list.length} update{list.length > 1 ? 's' : ''}{photos ? ` · 📷 ${photos}` : ''}</span></h4>
+              <button className="btn ghost xs" disabled={!!busy} onClick={() => dl(date, list, `${(h.ref || 'handover')}_${date}.pdf`)}><FileDown size={13} /> {busy === date ? 'Preparing…' : 'PDF'}</button>
+            </div>
+            <div className="timeline">
+              {list.map((u, i) => (
+                <div key={u.reportId || i} className="tl-item">
+                  <div className="tl-dot" />
+                  <div className="tl-body">
+                    <div className="tl-top">
+                      <div className="tl-who">{u.engineerName || 'Execution'}<span className="side">Execution</span></div>
+                      <div className="tl-time"><Badge value={u.projectStatus} /> {u.progressPercent != null && <span className="muted small">{u.progressPercent}%</span>}</div>
+                    </div>
+                    <div className="tl-msg">
+                      {u.todayProgress || u.workCompleted || <span className="muted">No written details</span>}
+                      {u.tomorrowPlan && <div className="muted small">Tomorrow: {u.tomorrowPlan}</div>}
+                      {u.materialRequired && <div className="small">Material: {u.materialRequired} {u.materialStatus && <Badge value={u.materialStatus} />}</div>}
+                      {u.photoCount > 0 && <div className="muted small">📷 {u.photoCount} site photo(s)</div>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </section>
   );
 }
