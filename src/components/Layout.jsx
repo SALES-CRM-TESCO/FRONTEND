@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { LayoutDashboard, FileStack, FilePlus2, Users, Bell, LogOut, UserCircle } from 'lucide-react';
+import { LayoutDashboard, FileStack, FilePlus2, Users, Bell, LogOut, UserCircle, PenTool } from 'lucide-react';
 import { useAuth } from '../auth.jsx';
 import { timeAgo } from '../api.js';
 import { NotificationsProvider, useNotifications } from '../notifications.jsx';
@@ -57,11 +57,13 @@ function Shell({ children }) {
     ? [
         { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
         { to: '/handovers', icon: FileStack, label: 'Handovers', end: true },
+        { to: '/design-requests', icon: PenTool, label: 'Design Requests' },
         { to: '/team', icon: Users, label: 'Team & Logins' },
       ]
     : [
         { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
         { to: '/handovers', icon: FileStack, label: 'Handovers', end: true },
+        { to: '/design-requests', icon: PenTool, label: 'Design Requests' },
         { to: '/notifications', icon: Bell, label: 'Alerts' },
       ];
   return (

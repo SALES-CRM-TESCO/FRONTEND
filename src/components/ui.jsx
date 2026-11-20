@@ -8,6 +8,8 @@ const statusClass = {
   // Execution project + material statuses (read-only daily updates)
   'Not Started': 'gray', 'Work In Progress': 'blue', 'On Hold': 'amber', 'Material Pending': 'orange', Completed: 'green', Delayed: 'red',
   Required: 'red', Ordered: 'amber', Delivered: 'green',
+  // Design request statuses
+  New: 'gray', Assigned: 'blue', 'Pending Review': 'amber', Approved: 'green',
 };
 
 export const Badge = ({ value, extra }) => (value ? <span className={`badge b-${statusClass[value] || 'gray'}`}>{value}{extra}</span> : null);

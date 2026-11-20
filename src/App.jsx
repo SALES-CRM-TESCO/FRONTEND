@@ -7,6 +7,7 @@ import Handovers from './pages/Handovers.jsx';
 import HandoverForm from './pages/HandoverForm.jsx';
 import HandoverDetail from './pages/HandoverDetail.jsx';
 import Team from './pages/Team.jsx';
+import DesignRequests from './pages/DesignRequests.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Account from './pages/Account.jsx';
 
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/handovers/:id/edit" element={<HandoverForm />} />
         <Route path="/handovers/:id" element={<HandoverDetail />} />
         {isHead && <Route path="/team" element={<Team />} />}
+        <Route path="/design-requests" element={<DesignRequests />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />
